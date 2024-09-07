@@ -1,0 +1,47 @@
+<body>
+  <script type="importmap">
+    {
+      "imports": {
+        "@dojoengine/torii-client": "https://ga.jspm.io/npm:@dojoengine/torii-client@1.0.0-alpha.12/dist/index.js"
+      },
+      "scopes": {
+        "https://ga.jspm.io/": {
+          "@dojoengine/torii-wasm": "https://ga.jspm.io/npm:@dojoengine/torii-wasm@1.0.0-alpha.12/pkg/web/dojo_c.js"
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/mithril/mithril.js"></script>
+  <script type="module">
+    let state = "loading";
+    let error;
+    const root = document.body;
+    m.mount(root, {
+      view: function () {
+        return [m("h1", state), error && m("p", error.toString())];
+      },
+    });
+
+    let torii;
+    try {
+      torii = await import("@dojoengine/torii-client");
+      try {
+        const toriiClient = await torii.createClient({
+          rpcUrl: config.rpcUrl,
+          toriiUrl: config.toriiUrl,
+          relayUrl: "",
+          worldAddress: config.manifest.world.address || "",
+        });
+        state = "done";
+      } catch (err) {
+        state = "error creating torii-client";
+        error = err;
+      }
+    } catch (err) {
+      state = `error importing torii-client`;
+      error = err;
+    }
+
+    m.redraw();
+  </script>
+</body>
